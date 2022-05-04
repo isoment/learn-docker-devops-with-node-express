@@ -1,0 +1,53 @@
+Notes
+-----
+
+The Dockerfile is used to build docker images. Most of the time we want to build our images from
+prebuilt images on the docker hub. We specify the base image we want using the FROM keyword.
+
+    FROM node:17
+
+There are different commands we can run in the Dockerfile like.. 
+
+    WORKDIR to set the working directory in the container. 
+    
+    RUN to execute commands at build time, ie when the image is being created.
+    
+    COPY to copy files from our machine to the container.
+
+    CMD to run commands at run time. Commands that run on the container after it is built and is running.
+
+Each command creates a layer of the docker image. When we build the image for the first time each
+command is run and the results are cached.
+
+    This means docker is very efficient when rebuilding images. If nothing has changed in a command
+    the cached results are used instead of it being run again.
+
+    When docker sees that a command line has changed and therefor a layer is changed all the lines 
+    after it are rerun.
+
+Once we have a Dockerfile we can build the image from the Dockerfile. If we are in the directory of the
+docker file we can run...
+
+    docker build .
+
+To build the image giving it a name...
+
+    docker build -t <name> .
+
+When we run the above command we can see the output docker gives where we got through the Dockerfile step
+by step and build each layer of the image.
+
+We can see images we have built...
+
+    docker image ls -a
+
+We can remove docker images...
+
+    docker image rm <image-id> <image-id>
+
+Once we have built the docker image we can create a container from it, we can run it using...
+
+    docker run -d --name <container-name> <image name or id>
+
+        We run the docker image in detached mode and give it a name
+
