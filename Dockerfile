@@ -16,8 +16,9 @@ RUN npm install
 # Copy all files from the current directory to /app
 COPY . ./
 
-# Expose port 3000
+# The EXPOSE command lets others know that this application is expecting the specified port
+# to be exposed.
 EXPOSE 3000
 
-# At runtime run node on index.js
-CMD [ "node", "index.js" ]
+# At runtime run our npm dev script utilizing nodemon
+CMD [ "npm", "run", "dev" ]

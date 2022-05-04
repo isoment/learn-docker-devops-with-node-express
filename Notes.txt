@@ -51,3 +51,59 @@ Once we have built the docker image we can create a container from it, we can ru
 
         We run the docker image in detached mode and give it a name
 
+We can remove our running docker container using the force flag...
+
+    docker rm <container-name> -f
+
+By default docker containers can talk to any outside points, on the internet or local network. However any
+outside services cannot communicate with the docker container. This means that by default our host machine
+cannot access anything in the docker container! 
+
+We can modify the docker run command to allow networking. The port on the right is the container port we
+are expecting traffic on. The number on the left is the port that traffic is coming in from from outside
+the container. Traffic to port 3000 on the host machine is forwarded to port 3000 on the docker container.
+Any valid ports can be used.
+
+    docker run -p <host machine port>:<container port> -d --name <container-name> <image name or id>
+    docker run -p 3000:3000 -d --name my-container my-image
+
+We can login to a docker container using the following command...
+
+    docker exec -it <container id or name> <program to run>
+    
+    docker exec -it d1c6865229b9 bash
+
+        The above will execute a bash shell on the container id in interactive mode.
+
+When we login to our docker container we see that by default it is copying all the files into the container
+this is unnecessary and a bad practice. We can use a .dockerignore file to prevent this. This works in
+the same way that a .gitignore file does.
+
+When we make a change to the index.js file in our app notice how the change is not reflected when we check
+the page. This is because the image we are running contains the old code and not the new updated code.
+
+    When we stop and remove the container, rebuild the image and run it again as show above we can
+    see the new changes to the index.js file.
+
+    This is obviously not practical at all.
+
+The answer to the above is using docker volumes which allow us to have persistent data. Docker has a specific
+volume type called a bind mount which allows us to sync a folder on the host machine to a folder within the
+docker container.
+
+To add a volume we can add another flag to the docker run command...
+
+    docker run -v <local dir>:<dir on container> -p 3000:3000 -d --name <container-name> <image name or id>
+
+    docker run -v $(pwd):/app -p 3000:3000 -d --name my-container my-image
+
+        We can get the current directory using $(pwd)
+
+Once the volume is set up we see that the volume changes are synced but we still see that changes we make to
+the index.js file are still not being reflected. Why?
+
+    This is not an issue with docker but one with node.js, every time changes are made we need to restart
+    the node server for those changes to be reflected. This is very inefficient.
+
+    Luckily there is something called nodemon, which is a utility that monitors for changes in the source code
+    files and automatically restart the node server.
