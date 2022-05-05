@@ -134,3 +134,37 @@ same. We may not want this, we can set the mode to read only which can be useful
 we don't want a docker container modifying any source code...
 
     docker run -v $(pwd):/app:ro ...
+
+We can set environment variables in the Dockerfile using ENV, so when we create an ENV PORT 3000 we can pass in
+a value when running the container. Here we are changing the container port to 4000...
+
+    docker run -v $(pwd):/app -v /app/node_modules --env PORT=4000 -p 3000:4000 -d --name node-app node-app-image
+
+    There are often many environment variables for a container, passing them in by the command line can be
+    a burden. We can create a .env file where we can access them and then use the following command instead...
+
+        docker run -v $(pwd):/app -v /app/node_modules --env-file ./.env -p 3000:4000 -d --name node-app node-app-image
+
+When we remove containers the volumes that they create are still saved on disk. We can choose to remove the volumes
+by adding another flag...
+
+    docker rm <container name or id> -fv
+
+The docker run commands can get very long and confusing especially since real applications have many docker containers.
+The solution to this is using docker-compose to streamline creating our containers. In docker compose our containers
+are called services. The -d flag runs it in detached mode.
+
+    docker-compose up -d
+
+To stop a container, the -v flag removes the volumes...
+
+    docker-compose down -v
+
+When we run docker-compose again we will notice that it does not rebuild the image. It checks the existing images to
+see if there is one that matches the name it is expecting
+
+    When we make a change to the Dockerfile and run docker-compose it is still not rebuilding the image!
+
+    When we make changes to the Dockerfile we need to tell docker-compose to rebuild the image(s).
+
+        docker-compose up -d --build

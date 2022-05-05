@@ -17,9 +17,12 @@ RUN npm install
 # Even when we set up a volume for development we still need this for deplyment.
 COPY . ./
 
+# Here we can declare enviroment variables
+ENV PORT 3000
+
 # The EXPOSE command lets others know that this application is expecting the specified port
 # to be exposed.
-EXPOSE 3000
+EXPOSE $PORT
 
 # At runtime run our npm dev script utilizing nodemon
 CMD [ "npm", "run", "dev" ]
