@@ -79,6 +79,10 @@ When we login to our docker container we see that by default it is copying all t
 this is unnecessary and a bad practice. We can use a .dockerignore file to prevent this. This works in
 the same way that a .gitignore file does.
 
+    Note that when we set up volume bind mount below the .dockerignore file is not used since the volume
+    setup is exposing the entire volume on the host to the docker container. When we have no bind mount
+    volumes the .dockerignore is used.
+
 When we make a change to the index.js file in our app notice how the change is not reflected when we check
 the page. This is because the image we are running contains the old code and not the new updated code.
 
@@ -199,3 +203,35 @@ In order to stop the containers...
 We can rebuild the image(s)...
 
     docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --build
+
+When toggling between production and development we often may want different dependencies for the application. We
+can use embedded bash scripts within the Dockerfile to act upon passed in arguments
+
+    ARG NODE_ENV
+
+    RUN if [ "$NODE_ENV" = "development" ]; \
+            then npm install; \
+            else npm install --only=production; \
+            fi
+
+In the above we pass in a ARG and depending on if the value of it is 'production' or 'development' we changed
+the npm install command.
+
+We need to pass this value in the docker compose file...
+
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+
+Context refers to the folder location where the Dockerfile is, and then we pass in the ARGS.
+
+So now when we want to start or stop in development mode, REMEMBER the -v flag removes the volume...
+
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d --build
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml down -v
+
+And when we want to start and stop in production, REMEMBER the -v flag removes the volume...
+
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d --build
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml down -v

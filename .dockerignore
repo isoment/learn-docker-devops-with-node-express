@@ -1,6 +1,8 @@
+Notes.txt
 node_modules
-Dockerfile
-.dockerignore
 .git
 .gitignore
-Notes.txt
+Dockerfile
+.dockerignore
+docker-compose*
+ORIGINAL*
