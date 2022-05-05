@@ -24,5 +24,6 @@ ENV PORT 3000
 # to be exposed.
 EXPOSE $PORT
 
-# At runtime run our npm dev script utilizing nodemon
-CMD [ "npm", "run", "dev" ]
+# At runtime run 'node index.js' for development we will override this in docker-compose to run 
+# our npm dev script utilizing nodemon.
+CMD [ "node", "index.js" ]

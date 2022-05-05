@@ -168,3 +168,34 @@ see if there is one that matches the name it is expecting
     When we make changes to the Dockerfile we need to tell docker-compose to rebuild the image(s).
 
         docker-compose up -d --build
+
+The commands that are run for development and deployment are often different. We can utilize docker compose to have
+a different setup depending on which situation we are in.
+
+    We can have separate dockerfiles and docker compose files for production and development or they can be
+    condensed into a single file.
+
+To split up the docker-compose files we will create one that will have the common settings named...
+
+    docker-compose.yml
+
+Then we create two more docker compose files, one for development specific settings and one for production.
+
+    docker-compose-dev.yml
+    docker-compose-prod.yml
+
+    We add a node specific environment variable, NODE_ENV, where we can specify whether it's in development 
+    or production.
+
+In order to run our new docker-compose setup with multiple files...
+
+    docker-compose -f <base-file> -f <specific-file> up -d
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d
+
+In order to stop the containers...
+
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml down -v
+
+We can rebuild the image(s)...
+
+    docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --build
