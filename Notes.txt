@@ -99,6 +99,9 @@ To add a volume we can add another flag to the docker run command...
 
         We can get the current directory using $(pwd)
 
+The volume bind mount is only for development, we wouldn't have this in production since the code is not
+being changed.
+
 Once the volume is set up we see that the volume changes are synced but we still see that changes we make to
 the index.js file are still not being reflected. Why?
 
@@ -107,3 +110,27 @@ the index.js file are still not being reflected. Why?
 
     Luckily there is something called nodemon, which is a utility that monitors for changes in the source code
     files and automatically restart the node server.
+
+Now that we have our volumes set up we want to get to a point where we have all our node_modules within
+the container and not on the host machine. If we try to remove the node_modules folder on the host now docker
+will crash.
+
+We can view the logs for a docker container...
+
+    docker logs <container name or id>
+
+And we see the error nodemon: not found. This is because we have set up volume bind mount and when our container
+starts we are overwriting everything in the /app directory of the docker container with our host project directory
+therefor erasing the node_modules folder.
+
+The solution to this is to create another volume when we are running the container. This is a different type of
+volume called an anonymous volume, -v /app/node_modules, basically all this is saying is that we want to override
+the previous bind mount and not allow any modification of node_modules in the container...
+
+    docker run -v $(pwd):/app -v /app/node_modules -p 3000:3000 -d --name my-container my-image
+
+In the above when we set up the volume bind mount the host can read and write files and the container can do the
+same. We may not want this, we can set the mode to read only which can be useful especially in production where
+we don't want a docker container modifying any source code...
+
+    docker run -v $(pwd):/app:ro ...

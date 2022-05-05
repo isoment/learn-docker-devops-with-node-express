@@ -14,6 +14,7 @@ COPY package.json .
 RUN npm install
 
 # Copy all files from the current directory to /app
+# Even when we set up a volume for development we still need this for deplyment.
 COPY . ./
 
 # The EXPOSE command lets others know that this application is expecting the specified port
