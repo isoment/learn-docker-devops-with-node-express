@@ -235,3 +235,55 @@ And when we want to start and stop in production, REMEMBER the -v flag removes t
 
     docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d --build
     docker-compose -f docker-compose.yml -f docker-compose-dev.yml down -v
+
+Many times we only need to the base image and no customization is necessary. In this case we don't need a
+docker file and can just add the service in docker-compose...
+
+    mongo: 
+      image: mongo
+      environment: 
+        - MONGO_INITDB_ROOT_USERNAME=root
+        - MONGO_INITDB_ROOT_PASSWORD=secret
+
+    We can then open a shell in the database container and run... mongo -u root ... and then enter the
+    password to log in.
+
+    Some basic mongo commands...
+
+        To create a db... use <database-name>
+
+        To list dbs, only those with contents... show dbs
+
+        To add an entry to a collection... 
+        
+            db.<collection>.insert({"name":"My Book"})
+
+        To list all items in a collection...
+
+            db.<collection>.find()
+
+When using a database image without specifying a volume, when we bring down the container all the information
+we stored is now gone.
+
+    What kind of volume should we use for a database container?
+
+        We could use a bind mount, that is def an options. But we don't necessarily need access to the
+        database from the host machine.
+
+        We have dealt with anonymous volumes before but the issue with these is that there is no way to
+        identify the volume. When using the -v flag the volume is deleted...
+        
+            docker-compose down -v
+
+        We can create a named volume in a docker-compose file, note we also have to declare it...
+
+            services
+             mongo: 
+              image: mongo
+              volumes:
+               - mongo-db:/data/db
+            
+            volumes:
+             mongo-db:
+
+        And just like above when bringing the containers down with the -v flag the named volumes are deleted.
