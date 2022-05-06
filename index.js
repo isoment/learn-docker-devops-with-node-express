@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { MONGO_USER, MONGO_PASSWORD, MONGO_IP, MONGO_PORT } = require("./config/config");
+const postRouter = require("./routes/postRoutes");
 
 const app = express();
 
@@ -12,19 +13,35 @@ const app = express();
 */
 const mongoURL = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_IP}:${MONGO_PORT}/?authSource=admin`
 
-mongoose.connect(mongoURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false
-}).then(() => console.log("Connection Success")).catch((e) => console.log(e));
+/*
+    Retrying the connection if it fails, the timer doesn't work now, it's still
+    retrying every 30 seconds.
+*/
+const connectWithRetry = () => {
+    mongoose.connect(mongoURL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).then(() => console.log("Connection Success"))
+        .catch((e) => {
+            console.log(e)
+            // If we can't connect to the mongo service keep trying every 5 seconds
+            setTimeout(connectWithRetry, 1000);
+        });
+}
+
+connectWithRetry();
+
+// Json middleware, this is needed to attach the actual request and attach it
+// to the express request object.
+app.use(express.json());
 
 app.get("/", (req, res) => {
     res.send("<h2>Hi There!!!</h2>")
 });
 
+// Any URL formatted as domain:3000/api/vi/posts is redirected to the postRouter
+app.use("/api/v1/posts", postRouter);
+
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => console.log({
-    message: `listening on port ${port}`,
-    env: process.env
-}));
+app.listen(port, () => console.log(`listening on port ${port}`));

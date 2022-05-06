@@ -321,3 +321,17 @@ the name of the service when referring to another container in place of an IP ad
 We can pass the mongodb credentials into the node container by adding some new environment variables to
 the docker-compose file. Whenever we create some new environment variables in docker-compose we need to
 rebuild the image.
+
+When using docker compose we often need to have containers start in a specific order. We don't want node
+to start before the mongodb. We can use depends_on to specify that one container depends on another.
+
+    nodeapp:
+      depends_on:
+        - mongo
+
+    This ensures that the mongo container will start before the nodeapp. But it does not ensure that that
+    database is working or accepting connections. Docker just controls which containers are initialized
+    first. There could still be situations where the database container is taking a longer time to boot
+    even though it was started first.
+
+        This is outside the scope of docker, there needs to be some application logic that deals with this.
