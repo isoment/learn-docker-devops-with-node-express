@@ -287,3 +287,29 @@ we stored is now gone.
              mongo-db:
 
         And just like above when bringing the containers down with the -v flag the named volumes are deleted.
+
+Lets install mongoose to our node container.
+
+    npm install mongoose
+
+When we are setting up mongoose we need to determine the ip address of the mongodb container. We can first get
+the container id using... docker ps
+
+    Once we have the container id we can run...
+
+        docker inspect <container-id>
+
+The above works but there is no guarantee that docker will assign the same ip to a container each time it is
+created. Luckily docker has networks which allow containers to communicate. To view the networks...
+
+    docker network ls
+
+And to get information about a specific network...
+
+    docker network inspect <network-name-or-id>
+
+We can already see that docker-compose created a custom default network for our application. Custom networks
+in docker have dns, so when we want to have containers communicate we can use the name of the container or
+the name of the service when referring to another container in place of an IP address.
+
+    We can confirm this by logging into a container and pinging another.
