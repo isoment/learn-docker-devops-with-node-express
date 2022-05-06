@@ -123,6 +123,10 @@ We can view the logs for a docker container...
 
     docker logs <container name or id>
 
+We can view the log tail with auto updating...
+
+    docker logs <container name or id> -f
+
 And we see the error nodemon: not found. This is because we have set up volume bind mount and when our container
 starts we are overwriting everything in the /app directory of the docker container with our host project directory
 therefor erasing the node_modules folder.
@@ -313,3 +317,7 @@ in docker have dns, so when we want to have containers communicate we can use th
 the name of the service when referring to another container in place of an IP address.
 
     We can confirm this by logging into a container and pinging another.
+
+We can pass the mongodb credentials into the node container by adding some new environment variables to
+the docker-compose file. Whenever we create some new environment variables in docker-compose we need to
+rebuild the image.
