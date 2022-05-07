@@ -16,6 +16,8 @@ services:
     environment: 
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=secret
+  redis:
+    image: redis
 
 volumes:
   mongo-db:

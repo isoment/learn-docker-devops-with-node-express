@@ -1,7 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { MONGO_USER, MONGO_PASSWORD, MONGO_IP, MONGO_PORT } = require("./config/config");
+const session = require("express-session");
+const redis = require("redis");
+const { 
+    MONGO_USER, 
+    MONGO_PASSWORD, 
+    MONGO_IP, 
+    MONGO_PORT, 
+    REDIS_URL, 
+    REDIS_PORT, 
+    SESSION_SECRET 
+} = require("./config/config");
 
+/*
+    Require and connect-redis and create a redis client
+*/
+let RedisStore = require("connect-redis")(session);
+let redisClient = redis.createClient({
+    host: REDIS_URL,
+    port: REDIS_PORT
+})
+
+/*
+    Routes files
+*/
 const postRouter = require("./routes/postRoutes");
 const userRouter = require("./routes/userRoutes");
 
@@ -32,6 +54,23 @@ const connectWithRetry = () => {
 }
 
 connectWithRetry();
+
+/*
+    Setting up sessions using express-session and setting the store to redis
+*/
+app.use(session({
+    store: new RedisStore({
+        client: redisClient
+    }),
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        httpOnly: true,
+        maxAge: 30000
+    }
+}));
 
 // Json middleware, this is needed to attach the actual request and attach it
 // to the express request object.
