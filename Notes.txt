@@ -346,3 +346,8 @@ leak memory.
         npm install express-session redis connect-redis
 
     See index.js for details on how to import and setup these packages.
+
+Once sessions are set up any time our application is accessed a cookie can be returned to the user with
+any kind of information we want.
+
+The users information is now stored in the session. We can use the express middleware for authentication.

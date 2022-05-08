@@ -10,6 +10,7 @@ exports.signUp = async (req, res) => {
             username,
             password: hashPassword
         })
+        req.session.user = newUser;
         res.status(201).json({
             status: 'success',
             data: {
@@ -28,18 +29,18 @@ exports.login = async (req, res) => {
 
     try {
         const user = await User.findOne({username})
-
         if (!user) {
             return res.status(404).json({
                 status: 'fail',
                 message: 'User not found'
             });
         }
-
-        // Hash the password the user provides and compare that to the value in db
+        // Hash the password the user provides and compare that to the value in db.
         const isCorrect = await bcrypt.compare(password, user.password)
-
+        // If the user info is correct store the user in the session.
         if (isCorrect) {
+            req.session.user = user;
+
             res.status(200).json({
                 status: 'success',
                 message: 'Login successful'
