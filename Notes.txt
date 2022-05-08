@@ -335,3 +335,14 @@ to start before the mongodb. We can use depends_on to specify that one container
     even though it was started first.
 
         This is outside the scope of docker, there needs to be some application logic that deals with this.
+
+Express has a simple session middleware called express-session for handling sessions. By default it will
+store session information in memory but this is not suitable for production, it does not scale and will
+leak memory.
+
+    There are many different stores we can pair with this library but we will use redis and a package
+    called connect-redis which allows node and redis to interact.
+
+        npm install express-session redis connect-redis
+
+    See index.js for details on how to import and setup these packages.

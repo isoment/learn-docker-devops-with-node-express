@@ -1,7 +1,3 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const session = require("express-session");
-const redis = require("redis");
 const { 
     MONGO_USER, 
     MONGO_PASSWORD, 
@@ -12,14 +8,20 @@ const {
     SESSION_SECRET 
 } = require("./config/config");
 
+const express = require("express");
+const mongoose = require("mongoose");
+const session = require("express-session");
+let redisStore = require('connect-redis')(session);
+const { createClient } = require("redis")
+
 /*
-    Require and connect-redis and create a redis client
+    Create a redis client log any errors when connecting
 */
-let RedisStore = require("connect-redis")(session);
-let redisClient = redis.createClient({
-    host: REDIS_URL,
-    port: REDIS_PORT
+let redisClient = createClient({
+    legacyMode: true,
+    url: `redis://:@${REDIS_URL}:${REDIS_PORT}`
 })
+redisClient.connect().catch(console.error);
 
 /*
     Routes files
@@ -59,12 +61,10 @@ connectWithRetry();
     Setting up sessions using express-session and setting the store to redis
 */
 app.use(session({
-    store: new RedisStore({
-        client: redisClient
-    }),
+    store: new redisStore({ client: redisClient }),
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
         secure: false,
         httpOnly: true,
@@ -77,7 +77,7 @@ app.use(session({
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("<h2>Hi There!!!</h2>")
+    res.send("<h2>Hi There! :)</h2>")
 });
 
 // Any URL formatted as domain:3000/api/vi/posts is redirected to the postRouter, etc...
