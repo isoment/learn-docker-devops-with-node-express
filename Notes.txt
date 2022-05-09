@@ -351,3 +351,24 @@ Once sessions are set up any time our application is accessed a cookie can be re
 any kind of information we want.
 
 The users information is now stored in the session. We can use the express middleware for authentication.
+
+When an application is deployed we need to think about how it will scale. Since docker is using containers
+we can increase them when applications get more traffic. Lets say our app starts seeing a lot of use, we
+can increase the amount of node app containers that can handle that traffic.
+
+    The way to handle this is with a load balancer, nginx is a popular option.
+
+
+                        /  Node/Express  
+    request -> nginx ->                   >   Mongo
+                        \  Node/Express
+
+
+    Nginx will receive all incoming requests and forward them to our node app instances. We open up one
+    port on the nginx container and that servers as the gateway for the entire application. The request
+    comes in on any port we define, in this case 3000, nginx listens on port 80 and will accept the incoming
+    requests and load balance them to our nodeapp containers.
+
+    See the nginx file for some basic settings.
+
+    We also need to get the nginx file into the nginx container.
