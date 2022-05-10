@@ -371,4 +371,11 @@ can increase the amount of node app containers that can handle that traffic.
 
     See the nginx file for some basic settings.
 
-    We also need to get the nginx file into the nginx container.
+    We also need to get the nginx file into the nginx container. We can do this using a volume.
+
+Docker has a scale command which allows us to create multiple containers of a service, so we can have as
+many instances of a service as we want.
+
+    We can add --scale <service-name>=<instance-count> to the docker-compose up command...
+
+    docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d --scale node-app=2

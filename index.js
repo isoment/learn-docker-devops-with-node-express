@@ -13,9 +13,10 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 let redisStore = require('connect-redis')(session);
 const { createClient } = require("redis")
+const cors = require("cors");
 
 /*
-    Create a redis client log any errors when connecting
+    Create a redis client log any errors when connecting.
 */
 let redisClient = createClient({
     legacyMode: true,
@@ -58,7 +59,19 @@ const connectWithRetry = () => {
 connectWithRetry();
 
 /*
-    Setting up sessions using express-session and setting the store to redis
+    Since we are using nginx as a load balance and forwarding the senders ip
+    this setting will allow us access to it.
+*/
+app.enable("trust proxy");
+
+/*
+    Cors is used for allowing a different domain to access our api. Useful in
+    cases for when the frontend and backend are on different domains.
+*/
+app.use(cors({}));
+
+/*
+    Setting up sessions using express-session and setting the store to redis.
 */
 app.use(session({
     store: new redisStore({ client: redisClient }),
