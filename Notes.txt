@@ -1,5 +1,5 @@
-Notes
------
+DEVELOPMENT
+-----------
 
 The Dockerfile is used to build docker images. Most of the time we want to build our images from
 prebuilt images on the docker hub. We specify the base image we want using the FROM keyword.
@@ -379,3 +379,54 @@ many instances of a service as we want.
     We can add --scale <service-name>=<instance-count> to the docker-compose up command...
 
     docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d --scale node-app=2
+
+
+DEPLOYMENT
+----------
+
+We can use digital ocean to deploy a docker application. For our case we can just create a basic droplet
+with the lowest amount of resources.
+
+Once we have a droplet up we need to login with ssh...
+
+    ssh root@<ip-address>
+
+Upgrade the droplet...
+
+    apt updated
+    apt upgrade
+    reboot
+
+Now that we are logged in docker can be installed using apt, or we can also use the script available from
+https://get.docker.com/
+
+    curl -fsSL https://get.docker.com -o get-docker.sh
+
+    sh get-docker.sh
+
+Docker will be installed now, but not docker-compose, see the following for installation, step 1...
+
+    https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04
+
+We want to be able to get the credentials that we require in our docker compose files from the machine env
+variables. We can set environment variables on linux using...
+
+    export <session-key>=<session-value>
+    export MONGO_USER=root
+
+    By adding them manually they will not persist when the application reboots!
+
+We can create a .env file that will store all of the variables we use for our application. This is not
+a file we include in the git repo since it will contain sensitive information. Add all the .env variables
+that we need in the format...
+
+    NODE_ENV=development
+    MONGO_USER=root
+
+We need to load the .env file when the system loads...
+
+    Open the .profile file in the /root directory
+
+    Add the following at the end of the file...
+
+        set -o allexport; source /root/.env; set +o allexport;
