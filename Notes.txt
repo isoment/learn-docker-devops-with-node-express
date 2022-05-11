@@ -440,3 +440,25 @@ run the production setup using...
 
 What is the workflow for updating our app. Ideally we have cloned the repo on our server. We can pull any
 changes from the repo to the server.
+
+    Once the changes we want are in the git repo, in the server we can run... git pull
+
+    We should now have the latest changes. We can proceed in two ways...
+
+        The standard... docker-compose down ... and then... docker compose up ... that we have been dockerignore
+        so far.
+
+        We can also run...
+
+            docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --build
+
+        The second option will result in a bit less downtime and will also preserve any of the containers
+        that have not changed. It only rebuilds the containers that have changes.
+
+The above works. But there are a few things that can be improved. In the above we are still checking all of the
+containers that are unchanged. We can specify the containers that we want to rebuild and only those will be rebuilt.
+
+    docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --build --no-deps <service-name>
+
+    We can pass in a --no-deps flag to ensure that only the service container we specify is rebuilt. Without this
+    the services it depends on will be rebuilt as well.
