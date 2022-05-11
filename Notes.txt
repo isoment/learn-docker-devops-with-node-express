@@ -430,3 +430,13 @@ We need to load the .env file when the system loads...
     Add the following at the end of the file...
 
         set -o allexport; source /root/.env; set +o allexport;
+
+Next create a directory for the application and clone the application from git, or upload it using scp. We
+run the production setup using...
+
+    docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d
+
+    It will build the application and then we can access it.
+
+What is the workflow for updating our app. Ideally we have cloned the repo on our server. We can pull any
+changes from the repo to the server.
