@@ -9,6 +9,7 @@ services:
       - node-app
   node-app:
     build: .
+    image: isoment/learn-docker-devops-with-node-express
     environment:
       - PORT=3000
     depends_on:

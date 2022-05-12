@@ -462,3 +462,65 @@ containers that are unchanged. We can specify the containers that we want to reb
 
     We can pass in a --no-deps flag to ensure that only the service container we specify is rebuilt. Without this
     the services it depends on will be rebuilt as well.
+
+We can also rebuild a specific container for whatever reason even if there are not any code changes. The
+--force-recreate flag can be used...
+
+    docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --force-recreate --no-deps <service-name>
+
+So far we have used the following workflow...
+
+    Push changes to application up to the git repo.
+
+    Pull from the git repo to the server.
+
+    Run docker-compose --build.
+
+    The image is built.
+
+    Repeat to rebuild the containers as needed.
+
+There are some problems with this workflow
+
+    Building images on the server is never recommended, it takes resources from the cpu and memory. As the
+    application grows it can take more resources to do this which will deprive the running application
+    of resources.
+
+The ideal workflow will... 
+
+    Have the developer build the image on the local machine. 
+    
+    The updated image is then pushed to dockerhub (requires an account).
+    
+    We can then pull the finalized image from dockerhub to the production server.
+
+    Then we run... docker-compose... up which will detect that there is a brand new image.
+
+    This will rebuild the existing container with the new image.
+
+Lets remake our workflow into the above process...
+
+    Login to dockerhub and create a new repository.
+
+    Make sure we are logged into docker on the terminal...
+
+        docker login
+
+    In order to push the image up to docker it needs to have a very specific name. The name needs to
+    be exactly as it is on the docker repo page including the username...
+
+        isoment/learn-docker-devops-with-node-express
+
+    We can do this using... docker tag
+
+        docker tag <existing-name> <formatted-name>
+        docker tag learn-docker-devops-with-node-express_node-app isoment/learn-docker-devops-with-node-express
+
+    Then we can push the newly named image up to the docker repo...
+
+        docker push isoment/learn-docker-devops-with-node-express
+
+    In the docker-compose.yml file we need to add the image repo so we can pull from it...
+
+        node-app:
+          image: isoment/learn-docker-devops-with-node-express
