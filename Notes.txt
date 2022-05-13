@@ -159,8 +159,10 @@ by adding another flag...
     docker rm <container name or id> -fv
 
 The docker run commands can get very long and confusing especially since real applications have many docker containers.
-The solution to this is using docker-compose to streamline creating our containers. In docker compose our containers
-are called services. The -d flag runs it in detached mode.
+The solution to this is using docker-compose to streamline creating our containers. Docker-compose is simply a file
+that maps out to different docker run commands.
+
+In docker compose our containers are called services. The -d flag runs it in detached mode.
 
     docker-compose up -d
 
@@ -520,7 +522,64 @@ Lets remake our workflow into the above process...
 
         docker push isoment/learn-docker-devops-with-node-express
 
-    In the docker-compose.yml file we need to add the image repo so we can pull from it...
+    In the docker-compose.yml file we need to add the image repo so we can pull from it, we can now just reference
+    the service name when building, pulling and pushing...
 
         node-app:
           image: isoment/learn-docker-devops-with-node-express
+
+    So every time our app changes we need to reubild the docker image and push it to dockerhub. We then pull
+    it from dockerhub to our production server.
+
+        So on our production server the ideal workflow is us pulling images from dockerhub and not github. We
+        build images on our local machine and upload them to dockerhub. These images from dockerhub are what's
+        used on the server. 
+
+So when we make some changes to an applications service...
+        
+    We can build the docker images using the build command. It will go through the docker-compose and build
+    all the custom images we have, we can specify an image by including it's name...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml build <service-name>
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml build node-app
+
+    We can push the image using the push command, all images will be pushed if one isn't specified...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml push <service-name>
+
+    In the server we can run the pull command with docker-compose, this will pull the images from dockerhub...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml pull <service-name>
+
+    And then...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d
+
+            Or to update only a specific service...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --no-deps <service-name>
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml up -d --no-deps node-app
+
+Run through the workflow one more time... 4:43:30
+
+There are some docker tools that can automate some of the workflow above. We can use a program called
+watchtower that will update the running version of our container on the server whenever we push
+a new image to the dockerhub repo.
+
+    Watchtower actually runs as an additional container that will watch the docker repo for any
+    new versions.
+
+    https://containrrr.dev/watchtower/
+
+To get started with watchtower...
+
+    docker run -d --name watchtower -e WATCHTOWER_TRACE=true -e WATCHTOWER_DEBUG=true -e WATCHTOWER_POLL_INTERVAL=50 -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower <container-name>
+
+        It will watch all containers if a list of container names are not specified. The poll interval is in seconds.
+        So it will check for a new image on dockerhub every 50 seconds
+
+Whether we use watchtower or do updates manually we will still be experiencing some downtime during the process.
+There is no real way for docker-compose to handle something like rolling updates, it's not a full container orchestrator.
+Kubernetes is a popular container orchestrator that can allow rolling updates with no downtime.
+
+    However there is a simpler container orchestrator that comes built in with docker called docker swarm.

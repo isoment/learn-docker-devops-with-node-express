@@ -90,7 +90,7 @@ app.use(session({
 app.use(express.json());
 
 app.get("/api/v1", (req, res) => {
-    res.send("<h2>Hi There!!!! :) ;)</h2>")
+    res.send("<h2>Hi There!!!! :)</h2><h5>Updated!</h5><h5>More content</h5>")
 });
 
 // Any URL formatted as domain:3000/api/vi/posts is redirected to the postRouter, etc...
