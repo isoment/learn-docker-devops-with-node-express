@@ -628,3 +628,58 @@ But we can also use docker swarm within the docker compose file. Some of the opt
     And more...
 
         https://docs.docker.com/compose/compose-file/compose-file-v3/
+
+We can add the following to our production docker compose file...
+
+    deploy:
+      replicas: 8
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 2
+        delay: 15s
+
+    Then push the changes to github.
+
+    Then pull them down from github onto the server.
+
+    Once we have the new docker-compose file on the server we use the docker stack deploy command...
+
+        docker stack deploy -c docker-compose.yml -c docker-compose-prod.yml <stack-name>
+
+    We can see the node with all of our services (stack)
+
+        docker node ls
+
+    We can list the services in a stack...
+
+        docker stack services <stack-name>
+
+            or
+
+        docker service ls
+
+    To list the tasks in a stack...
+
+        docker stack ps <stack-name>
+
+Once we have a docker swarm up on our server we can update our application as follows...
+
+    Build a new image...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml build node-app
+
+    Push it to dockerhub...
+
+        docker-compose -f docker-compose.yml -f docker-compose-prod.yml push node-app
+
+    On the server run...
+
+        docker stack deploy -c docker-compose.yml -c docker-compose-prod.yml <stack-name>
+
+    Once we run the above deploy command swarm will start updating all of our containers that have changed
+    two at a time.
+
+To stop a docker swarm stack...
+
+    docker stack rm <stack-name>
