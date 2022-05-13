@@ -64,12 +64,12 @@ are expecting traffic on. The number on the left is the port that traffic is com
 the container. Traffic to port 3000 on the host machine is forwarded to port 3000 on the docker container.
 Any valid ports can be used.
 
-    docker run -p <host machine port>:<container port> -d --name <container-name> <image name or id>
+    docker run -p <host-machine-port>:<container-port> -d --name <container-name> <image-name-or-id>
     docker run -p 3000:3000 -d --name my-container my-image
 
 We can login to a docker container using the following command...
 
-    docker exec -it <container id or name> <program to run>
+    docker exec -it <container-id-or-name> <program-to-run>
     
     docker exec -it d1c6865229b9 bash
 
@@ -97,7 +97,7 @@ docker container.
 
 To add a volume we can add another flag to the docker run command...
 
-    docker run -v <local dir>:<dir on container> -p 3000:3000 -d --name <container-name> <image name or id>
+    docker run -v <local-dir>:<dir-on-container> -p 3000:3000 -d --name <container-name> <image-name-or-id>
 
     docker run -v $(pwd):/app -p 3000:3000 -d --name my-container my-image
 
@@ -121,11 +121,11 @@ will crash.
 
 We can view the logs for a docker container...
 
-    docker logs <container name or id>
+    docker logs <container-name-or-id>
 
 We can view the log tail with auto updating...
 
-    docker logs <container name or id> -f
+    docker logs <container-name-or-id> -f
 
 And we see the error nodemon: not found. This is because we have set up volume bind mount and when our container
 starts we are overwriting everything in the /app directory of the docker container with our host project directory
@@ -156,7 +156,7 @@ a value when running the container. Here we are changing the container port to 4
 When we remove containers the volumes that they create are still saved on disk. We can choose to remove the volumes
 by adding another flag...
 
-    docker rm <container name or id> -fv
+    docker rm <container-name-or-id> -fv
 
 The docker run commands can get very long and confusing especially since real applications have many docker containers.
 The solution to this is using docker-compose to streamline creating our containers. Docker-compose is simply a file
@@ -582,4 +582,49 @@ Whether we use watchtower or do updates manually we will still be experiencing s
 There is no real way for docker-compose to handle something like rolling updates, it's not a full container orchestrator.
 Kubernetes is a popular container orchestrator that can allow rolling updates with no downtime.
 
-    However there is a simpler container orchestrator that comes built in with docker called docker swarm.
+However there is a simpler container orchestrator that comes built in with docker called docker swarm. Swarm allows...
+
+    Orchestration. We saw docker-compose has limited logic. It's really just a collection of docker run commands. Swarm is an
+    actual orchestrator with logic.
+
+    Distribution of docker containers across multiple servers.
+
+    Handling the update process in such a way as to eliminate downtime. New updated containers can be spun up and
+    only once those new containers are updated and running can the old one sbe removed.
+
+Each server within a docker swarm is referred to as a node. There are manager and worker nodes. The manager nodes
+push out tasks to the worker nodes which in turn carry them out. Nodes can have both roles.
+
+Swarm is a production tool, docker-compose is a development tool. Compose can be used in production for small projects
+but it is not suitable for real world applications.
+
+We can check to see if swarm is enable (usually not by default)...
+
+    docker info
+
+To enable swarm, if the server has multiple ip addresses choose the public facing one...
+
+    docker swarm init --advertise-addr <ip-address>
+
+Swarm works with docker service which are similar to containers. We can use swarm by using docker service commands, to
+list the commands...
+
+    docker service --help
+
+But we can also use docker swarm within the docker compose file. Some of the options...
+
+    replicas. We can replicate a service and specify how many containers are created.
+
+    resources. We can limit the resource usage of a container.
+
+    restart_policy. Dictates how the container is restarted
+
+    update_config. Useful for configuring rolling updates, has several options...
+
+        parallelism will update the specified number of containers at a time
+
+        failure_action determines what to do if an update fails. We can roll back to the old version
+
+    And more...
+
+        https://docs.docker.com/compose/compose-file/compose-file-v3/
